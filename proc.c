@@ -88,6 +88,10 @@ allocproc(void)
 found:
   p->state = EMBRYO;
   p->pid = nextpid++;
+  p->priority = 1;
+  p->deadline = 0;
+  p->policy = 2;
+  p->execution_time = 2;
 
   release(&ptable.lock);
 
@@ -322,14 +326,16 @@ wait(void)
 void
 scheduler(void)
 {
-  struct proc *p;
+  struct proc *p, *p1;
   struct cpu *c = mycpu();
   c->proc = 0;
   
   for(;;){
     // Enable interrupts on this processor.
     sti();
-
+    struct proc *highP;
+    int policy_to_use = 2;
+    // uint ticks_consumed;
     // Loop over process table looking for process to run.
     acquire(&ptable.lock);
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
@@ -339,6 +345,23 @@ scheduler(void)
       // Switch to chosen process.  It is the process's job
       // to release ptable.lock and then reacquire it
       // before jumping back to us.
+      highP = p;
+      policy_to_use = p->policy;
+      if (policy_to_use != 2) {
+        for(p1 = ptable.proc; p1 < &ptable.proc[NPROC]; p1++){
+          if (policy_to_use == 0) {
+            if(p1->state != RUNNABLE || p1->policy !=0)
+              continue;
+            if(p1->deadline < highP->deadline)
+              highP = p1;
+          } else if (policy_to_use == 1){
+
+          }
+        }
+        cprintf("Process chosen is %d\n", highP->pid);
+      }
+      p = highP;
+      // ticks_consumed = ticks;
       c->proc = p;
       switchuvm(p);
       p->state = RUNNING;
@@ -348,6 +371,12 @@ scheduler(void)
 
       // Process is done running for now.
       // It should have changed its p->state before coming back.
+      // ticks_consumed = ticks - ticks_consumed;
+      p->execution_time = p->execution_time - 1;
+      if(p->execution_time <= 0) {
+        p->state = SLEEPING;
+      }
+      // cprintf("PID - %d, Exec Time - %d, State - %s", p->pid, p->execution_time, p->state);
       c->proc = 0;
     }
     release(&ptable.lock);
@@ -543,15 +572,14 @@ printinfo(void)
   acquire(&ptable.lock);
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
     if(p->state == SLEEPING)
-      cprintf("Process State - SLEEPING, Process Name - %s, Process Id - %d, Process Priority - %d\n",p->name,p->pid,p->priority);
+      cprintf("Process State - SLEEPING, Process Name - %s, Process Id - %d, Policy - %d, Exec time - %d, Deadline - %d\n",p->name,p->pid,p->policy, p->execution_time, p->deadline);
     else if(p->state == RUNNING)
-      cprintf("Process State - RUNNING, Process Name - %s, Process Id - %d, Process Priority - %d\n",p->name,p->pid,p->priority);
+      cprintf("Process State - RUNNING, Process Name - %s, Process Id - %d, Policy - %d, Exec time - %d, Deadline - %d\n",p->name,p->pid,p->policy, p->execution_time, p->deadline);
     else if(p->state == RUNNABLE)
-      cprintf("Process State - RUNNABLE, Process Name - %s, Process Id - %d, Process Priority - %d\n",p->name,p->pid,p->priority);
+      cprintf("Process State - RUNNABLE, Process Name - %s, Process Id - %d, Policy - %d, Exec time - %d, Deadline - %d\n",p->name,p->pid,p->policy, p->execution_time, p->deadline);
   }
   release(&ptable.lock);
-
-
+  // utf_edf++;
   return 22;
 }
 
@@ -560,7 +588,17 @@ sched_policy(int pid, int policy)
 {
   // add code for schedulability checks and change policy
   // if not pass return -22
-  cprintf("\nCPU variable policy is: %d and utf is %d", policy, mycpu()->utilization_factor_edf);
+  struct proc *p;
+  sti();
+
+  acquire(&ptable.lock);
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+    if(p->pid == pid){
+      p->policy = policy;
+      break;
+    }
+  }
+  release(&ptable.lock);
   return 0;
 }
 
@@ -569,6 +607,17 @@ exec_time(int pid, int time)
 {
   // add code for adding exec time to all processes and default exec time
   // return -22 if not success
+  struct proc *p;
+  sti();
+
+  acquire(&ptable.lock);
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+    if(p->pid == pid){
+      p->execution_time = time;
+      break;
+    }
+  }
+  release(&ptable.lock);
   return 0;
 }
 
@@ -577,6 +626,17 @@ deadline(int pid, int deadline)
 {
   // add code for adding deadline to all processes and default deadline
   // return -22 if not success
+  struct proc *p;
+  sti();
+
+  acquire(&ptable.lock);
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+    if(p->pid == pid){
+      p->deadline = deadline;
+      break;
+    }
+  }
+  release(&ptable.lock);
   return 0;
 }
 
