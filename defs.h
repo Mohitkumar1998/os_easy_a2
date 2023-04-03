@@ -120,6 +120,11 @@ void            userinit(void);
 int             wait(void);
 void            wakeup(void*);
 void            yield(void);
+int             printinfo(void);
+int             sched_policy(int pid, int policy);
+int             exec_time(int pid, int time);
+int             deadline(int pid, int deadline);
+int             rate(int pid, int rate);
 
 // swtch.S
 void            swtch(struct context**, struct context*);

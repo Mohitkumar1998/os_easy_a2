@@ -23,6 +23,11 @@ int getpid(void);
 char* sbrk(int);
 int sleep(int);
 int uptime(void);
+int printinfo(void);
+int sched_policy(int pid, int policy);
+int exec_time(int pid, int time);
+int deadline(int pid, int p_deadline);
+int rate(int pid, int p_rate);
 
 // ulib.c
 int stat(const char*, struct stat*);

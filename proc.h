@@ -8,6 +8,8 @@ struct cpu {
   int ncli;                    // Depth of pushcli nesting.
   int intena;                  // Were interrupts enabled before pushcli?
   struct proc *proc;           // The process running on this cpu or null
+  float utilization_factor_edf;                  // Utilization factor for edf schedulability check
+  float utilization_factor_rm;                   // Utilization factor for rm schedulability check
 };
 
 extern struct cpu cpus[NCPU];
@@ -49,6 +51,9 @@ struct proc {
   struct file *ofile[NOFILE];  // Open files
   struct inode *cwd;           // Current directory
   char name[16];               // Process name (debugging)
+  int priority;                // Priority of the process
+  int deadline;                // Process deadline
+  int policy;                  // Variable for choosing the scheduling algorithm
 };
 
 // Process memory is laid out contiguously, low addresses first:

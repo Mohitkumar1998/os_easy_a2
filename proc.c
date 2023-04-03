@@ -532,3 +532,58 @@ procdump(void)
     cprintf("\n");
   }
 }
+
+// 
+int
+printinfo(void)
+{
+  struct proc *p;
+  sti();
+
+  acquire(&ptable.lock);
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+    if(p->state == SLEEPING)
+      cprintf("Process State - SLEEPING, Process Name - %s, Process Id - %d, Process Priority - %d\n",p->name,p->pid,p->priority);
+    else if(p->state == RUNNING)
+      cprintf("Process State - RUNNING, Process Name - %s, Process Id - %d, Process Priority - %d\n",p->name,p->pid,p->priority);
+    else if(p->state == RUNNABLE)
+      cprintf("Process State - RUNNABLE, Process Name - %s, Process Id - %d, Process Priority - %d\n",p->name,p->pid,p->priority);
+  }
+  release(&ptable.lock);
+
+
+  return 22;
+}
+
+int 
+sched_policy(int pid, int policy)
+{
+  // add code for schedulability checks and change policy
+  // if not pass return -22
+  cprintf("\nCPU variable policy is: %d and utf is %d", policy, mycpu()->utilization_factor_edf);
+  return 0;
+}
+
+int 
+exec_time(int pid, int time)
+{
+  // add code for adding exec time to all processes and default exec time
+  // return -22 if not success
+  return 0;
+}
+
+int 
+deadline(int pid, int deadline)
+{
+  // add code for adding deadline to all processes and default deadline
+  // return -22 if not success
+  return 0;
+}
+
+int 
+rate(int pid, int rate)
+{
+  // add code for adding rate to processes and default rate
+  // return -22 if not success
+  return 0;
+}

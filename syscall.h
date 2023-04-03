@@ -20,3 +20,8 @@
 #define SYS_link   19
 #define SYS_mkdir  20
 #define SYS_close  21
+#define SYS_printinfo      22
+#define SYS_sched_policy   23
+#define SYS_exec_time      24
+#define SYS_deadline       25
+#define SYS_rate           26

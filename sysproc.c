@@ -89,3 +89,42 @@ sys_uptime(void)
   release(&tickslock);
   return xticks;
 }
+
+
+int
+sys_printinfo(void)
+{
+  return printinfo();
+}
+
+int 
+sys_sched_policy(int pid, int policy)
+{
+  argint(0, &pid);
+  argint(1, &policy);
+  return sched_policy(pid, policy);
+}
+
+int
+sys_exec_time(int pid, int time)
+{
+  argint(0, &pid);
+  argint(1, &time);
+  return exec_time(pid, time);
+}
+
+int
+sys_deadline(int pid, int p_deadline)
+{
+  argint(0, &pid);
+  argint(1, &p_deadline);
+  return deadline(pid, p_deadline);
+}
+
+int
+sys_rate(int pid, int p_rate)
+{
+  argint(0, &pid);
+  argint(1, &p_rate);
+  return rate(pid, p_rate);
+}
