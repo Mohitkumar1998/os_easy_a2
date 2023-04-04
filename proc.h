@@ -54,6 +54,7 @@ struct proc {
   int sched_policy;            // Variable for choosing the scheduling algorithm
   int execution_time;          // Execution time
   int elapsed_time;            // Elapsed time
+  int rate;                    // Rate
 };
 
 // Process memory is laid out contiguously, low addresses first:

@@ -338,7 +338,7 @@ scheduler(void)
     // Enable interrupts on this processor.
     sti();
     struct proc *highP;
-    int policy_to_use = 2;
+    int policy_to_use = -1;
     // uint ticks_consumed;
     // Loop over process table looking for process to run.
     acquire(&ptable.lock);
@@ -365,6 +365,24 @@ scheduler(void)
             }
           }
         }
+        // cprintf("Process chosen is %d\n", highP->pid);
+        highP->elapsed_time += 1;
+        // cprintf("Process Execution Time: %d\n", highP->execution_time);
+      } else if (policy_to_use == 1) {
+        for(p1 = ptable.proc; p1 < &ptable.proc[NPROC]; p1++){
+          if(p1->state != RUNNABLE)
+            continue;
+          if(p1->priority <= highP->priority){
+            if(p1->priority == highP->priority) {
+              if (p1->pid < highP ->pid) {
+                highP = p1;
+              }
+            } else {
+              highP = p1;
+            }
+          }
+        }
+        // cprintf("************Process Pid - %d, Process rate - %d, Process Priority - %d\n", highP->pid, highP->rate, highP->priority);
         // cprintf("Process chosen is %d\n", highP->pid);
         highP->elapsed_time += 1;
         // cprintf("Process Execution Time: %d\n", highP->execution_time);
@@ -599,6 +617,7 @@ sched_policy(int pid, int policy)
   // if not pass return -22
   struct proc *p;
   int check = 0;
+  int lproc = pid-2;
   sti();
 
   acquire(&ptable.lock);
@@ -611,9 +630,155 @@ sched_policy(int pid, int policy)
           p->killed = 1;
           p->state = ZOMBIE;
           check = 1;
+
         } else {
           p->sched_policy = policy;
           check = 0;
+        }
+      }
+      if (policy == 1) {
+        int curr_utf_rm = p->execution_time * p->rate * 10;
+        int tempChk = utf_rm + curr_utf_rm;
+        int chk_lproc = 0;
+        // cprintf("lproc - %d, pid - %d\n", lproc, p->pid);
+        if (lproc == 1) {
+          chk_lproc = 1000;
+        } else if (lproc == 2) {
+          chk_lproc = 828;
+        } else if (lproc == 3) {
+          chk_lproc = 779;
+        } else if (lproc == 4) {
+          chk_lproc = 756;
+        } else if (lproc == 5) {
+          chk_lproc = 743;
+        } else if (lproc == 6) {
+          chk_lproc = 734;
+        } else if (lproc == 7) {
+          chk_lproc = 728;
+        } else if (lproc == 8) {
+          chk_lproc = 724;
+        } else if (lproc == 9) {
+          chk_lproc = 720;
+        } else if (lproc == 10) {
+          chk_lproc = 717;
+        } else if (lproc == 11) {
+          chk_lproc = 715;
+        } else if (lproc == 12) {
+          chk_lproc = 713;
+        } else if (lproc == 13) {
+          chk_lproc = 711;
+        } else if (lproc == 14) {
+          chk_lproc = 710;
+        } else if (lproc == 15) {
+          chk_lproc = 709;
+        } else if (lproc == 16) {
+          chk_lproc = 708;
+        } else if (lproc == 17) {
+          chk_lproc = 707;
+        } else if (lproc == 18) {
+          chk_lproc = 706;
+        } else if (lproc == 19) {
+          chk_lproc = 705;
+        } else if (lproc == 20) {
+          chk_lproc = 705;
+        } else if (lproc == 21) {
+          chk_lproc = 704;
+        } else if (lproc == 22) {
+          chk_lproc = 704;
+        } else if (lproc == 23) {
+          chk_lproc = 703;
+        } else if (lproc == 24) {
+          chk_lproc = 703;
+        } else if (lproc == 25) {
+          chk_lproc = 702;
+        } else if (lproc == 26) {
+          chk_lproc = 702;
+        } else if (lproc == 27) {
+          chk_lproc = 702;
+        } else if (lproc == 28) {
+          chk_lproc = 701;
+        } else if (lproc == 29) {
+          chk_lproc = 701;
+        } else if (lproc == 30) {
+          chk_lproc = 701;
+        } else if (lproc == 31) {
+          chk_lproc = 700;
+        } else if (lproc == 32) {
+          chk_lproc = 700;
+        } else if (lproc == 33) {
+          chk_lproc = 700;
+        } else if (lproc == 34) {
+          chk_lproc = 700;
+        } else if (lproc == 35) {
+          chk_lproc = 700;
+        } else if (lproc == 36) {
+          chk_lproc = 699;
+        } else if (lproc == 37) {
+          chk_lproc = 699;
+        } else if (lproc == 38) {
+          chk_lproc = 699;
+        } else if (lproc == 39) {
+          chk_lproc = 699;
+        } else if (lproc == 40) {
+          chk_lproc = 699;
+        } else if (lproc == 41) {
+          chk_lproc = 699;
+        } else if (lproc == 42) {
+          chk_lproc = 698;
+        } else if (lproc == 43) {
+          chk_lproc = 698;
+        } else if (lproc == 44) {
+          chk_lproc = 698;
+        } else if (lproc == 45) {
+          chk_lproc = 698;
+        } else if (lproc == 46) {
+          chk_lproc = 698;
+        } else if (lproc == 47) {
+          chk_lproc = 698;
+        } else if (lproc == 48) {
+          chk_lproc = 698;
+        } else if (lproc == 49) {
+          chk_lproc = 698;
+        } else if (lproc == 50) {
+          chk_lproc = 697;
+        } else if (lproc == 51) {
+          chk_lproc = 697;
+        } else if (lproc == 52) {
+          chk_lproc = 697;
+        } else if (lproc == 53) {
+          chk_lproc = 697;
+        } else if (lproc == 54) {
+          chk_lproc = 697;
+        } else if (lproc == 55) {
+          chk_lproc = 697;
+        } else if (lproc == 56) {
+          chk_lproc = 697;
+        } else if (lproc == 57) {
+          chk_lproc = 697;
+        } else if (lproc == 58) {
+          chk_lproc = 697;
+        } else if (lproc == 59) {
+          chk_lproc = 697;
+        } else if (lproc == 60) {
+          chk_lproc = 697;
+        } else if (lproc == 61) {
+          chk_lproc = 697;
+        } else if (lproc == 62) {
+          chk_lproc = 697;
+        } else if (lproc == 63) {
+          chk_lproc = 696;
+        } else {
+          chk_lproc = 696;
+        }
+        if (tempChk <= chk_lproc) {
+          utf_rm += curr_utf_rm;
+          p->sched_policy = policy;
+          check = 0;
+        } else {
+          // cprintf("Pid - %d, tempchk - %d, check_lproc - %d", p->pid, tempChk, chk_lproc);
+          p->killed = 1;
+          p->state = ZOMBIE;
+          check = 1;
         }
       }
       break;
@@ -629,45 +794,71 @@ sched_policy(int pid, int policy)
 int 
 exec_time(int pid, int time)
 {
-  // add code for adding exec time to all processes and default exec time
-  // return -22 if not success
   struct proc *p;
   sti();
+  int found = 0;
 
   acquire(&ptable.lock);
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
     if(p->pid == pid){
+      found = 1;
       p->execution_time = time;
       break;
     }
   }
   release(&ptable.lock);
+  if (found == 0)
+    return -22;
+
   return 0;
 }
 
 int 
 deadline(int pid, int deadline)
 {
-  // add code for adding deadline to all processes and default deadline
-  // return -22 if not success
   struct proc *p;
   sti();
+  int found = 0;
 
   acquire(&ptable.lock);
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
     if(p->pid == pid){
+      found = 1;
       p->deadline = deadline;
       break;
     }
   }
   release(&ptable.lock);
+  if (found == 0)
+    return -22;
+
   return 0;
 }
 
 int 
 rate(int pid, int rate)
 {
-  // add code for adding rate to processes and default rate
-  // return -22 if not success
+  struct proc *p;
+  sti();
+  int found = 0;
+
+  acquire(&ptable.lock);
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+    if(p->pid == pid){
+      found = 1;
+      p->rate = rate;
+      int priority_temp = (90 - 3 * rate + 28)/29;
+      if (priority_temp < 1) {
+        p->priority = 1;
+      } else {
+        p->priority = priority_temp;
+      }
+      break;
+    }
+  }
+  release(&ptable.lock);
+  if (found == 0)
+    return -22;
+  
   return 0;
 }

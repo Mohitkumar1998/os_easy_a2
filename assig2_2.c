@@ -1,9 +1,10 @@
 #include "types.h"
 #include "stat.h"
 #include "user.h"
-#include "fcntl.h"
 
-int main(void){
+// TC#2: RM Schedulable test case
+int main(int argc, char *argv[])
+{   
     int num_procs = 2;
     int rate_value[2] = {21, 11};
     int exectime[2] = {1, 2};
