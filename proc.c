@@ -772,6 +772,7 @@ sched_policy(int pid, int policy)
         }
         if (tempChk <= chk_lproc) {
           utf_rm += curr_utf_rm;
+          p->arrival_time = ticks;
           p->sched_policy = policy;
           check = 0;
         } else {
