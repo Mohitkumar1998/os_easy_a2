@@ -14,6 +14,9 @@ struct {
 
 static struct proc *initproc;
 
+int utf_edf = 0;
+int utf_rm = 0;
+
 int nextpid = 1;
 extern void forkret(void);
 extern void trapret(void);
@@ -90,8 +93,9 @@ found:
   p->pid = nextpid++;
   p->priority = 1;
   p->deadline = 0;
-  p->policy = 2;
-  p->execution_time = 2;
+  p->sched_policy = -1;
+  p->execution_time = 1;
+  p->elapsed_time = 0;
 
   release(&ptable.lock);
 
@@ -346,19 +350,24 @@ scheduler(void)
       // to release ptable.lock and then reacquire it
       // before jumping back to us.
       highP = p;
-      policy_to_use = p->policy;
-      if (policy_to_use != 2) {
+      policy_to_use = p->sched_policy;
+      if (policy_to_use == 0) {
         for(p1 = ptable.proc; p1 < &ptable.proc[NPROC]; p1++){
-          if (policy_to_use == 0) {
-            if(p1->state != RUNNABLE || p1->policy !=0)
-              continue;
-            if(p1->deadline < highP->deadline)
+          if(p1->state != RUNNABLE)
+            continue;
+          if(p1->deadline <= highP->deadline){
+            if(p1->deadline == highP->deadline) {
+              if (p1->pid < highP ->pid) {
+                highP = p1;
+              }
+            } else {
               highP = p1;
-          } else if (policy_to_use == 1){
-
+            }
           }
         }
-        cprintf("Process chosen is %d\n", highP->pid);
+        // cprintf("Process chosen is %d\n", highP->pid);
+        highP->elapsed_time += 1;
+        // cprintf("Process Execution Time: %d\n", highP->execution_time);
       }
       p = highP;
       // ticks_consumed = ticks;
@@ -372,10 +381,10 @@ scheduler(void)
       // Process is done running for now.
       // It should have changed its p->state before coming back.
       // ticks_consumed = ticks - ticks_consumed;
-      p->execution_time = p->execution_time - 1;
-      if(p->execution_time <= 0) {
-        p->state = SLEEPING;
-      }
+      // p->execution_time = p->execution_time - 1;
+      // if(p->execution_time <= 0) {
+      //   p->state = SLEEPING;
+      // }
       // cprintf("PID - %d, Exec Time - %d, State - %s", p->pid, p->execution_time, p->state);
       c->proc = 0;
     }
@@ -572,11 +581,11 @@ printinfo(void)
   acquire(&ptable.lock);
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
     if(p->state == SLEEPING)
-      cprintf("Process State - SLEEPING, Process Name - %s, Process Id - %d, Policy - %d, Exec time - %d, Deadline - %d\n",p->name,p->pid,p->policy, p->execution_time, p->deadline);
+      cprintf("Process State - SLEEPING, Process Name - %s, Process Id - %d, Policy - %d, Exec time - %d, Deadline - %d\n",p->name,p->pid,p->sched_policy, p->execution_time, p->deadline);
     else if(p->state == RUNNING)
-      cprintf("Process State - RUNNING, Process Name - %s, Process Id - %d, Policy - %d, Exec time - %d, Deadline - %d\n",p->name,p->pid,p->policy, p->execution_time, p->deadline);
+      cprintf("Process State - RUNNING, Process Name - %s, Process Id - %d, Policy - %d, Exec time - %d, Deadline - %d\n",p->name,p->pid,p->sched_policy, p->execution_time, p->deadline);
     else if(p->state == RUNNABLE)
-      cprintf("Process State - RUNNABLE, Process Name - %s, Process Id - %d, Policy - %d, Exec time - %d, Deadline - %d\n",p->name,p->pid,p->policy, p->execution_time, p->deadline);
+      cprintf("Process State - RUNNABLE, Process Name - %s, Process Id - %d, Policy - %d, Exec time - %d, Deadline - %d\n",p->name,p->pid,p->sched_policy, p->execution_time, p->deadline);
   }
   release(&ptable.lock);
   // utf_edf++;
@@ -589,16 +598,31 @@ sched_policy(int pid, int policy)
   // add code for schedulability checks and change policy
   // if not pass return -22
   struct proc *p;
+  int check = 0;
   sti();
 
   acquire(&ptable.lock);
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
     if(p->pid == pid){
-      p->policy = policy;
+      if (policy == 0) {
+        utf_edf += (p->execution_time * 100)/p->deadline;
+        if (utf_edf >= 100) {
+          utf_edf -= (p->execution_time*100)/p->deadline;
+          p->killed = 1;
+          p->state = ZOMBIE;
+          check = 1;
+        } else {
+          p->sched_policy = policy;
+          check = 0;
+        }
+      }
       break;
     }
   }
   release(&ptable.lock);
+  if (check > 0)
+    return -22;
+  
   return 0;
 }
 

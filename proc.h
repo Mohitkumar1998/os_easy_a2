@@ -51,8 +51,9 @@ struct proc {
   char name[16];               // Process name (debugging)
   int priority;                // Priority of the process
   int deadline;                // Process deadline
-  int policy;                  // Variable for choosing the scheduling algorithm
+  int sched_policy;            // Variable for choosing the scheduling algorithm
   int execution_time;          // Execution time
+  int elapsed_time;            // Elapsed time
 };
 
 // Process memory is laid out contiguously, low addresses first:
